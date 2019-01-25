@@ -26,7 +26,7 @@ class data
 
 	public function where($sql)
 	{
-		$this->sifirla();
+		$this->remove();
 		$this->where = $sql;
 		return $this;
 	}
@@ -35,24 +35,6 @@ class data
 	{
 		$this->join = $sql;
 		return $this;
-	}
-
-	public function listele($page)
-	{
-		$page = $page*page;
-		if($this->join!='')
-		{
-			$sql = 'SELECT * FROM '.$this->vt.' '.$this->join.' WHERE sil=0 '.$this->orderby.' LIMIT '.$page.','.page;
-		}
-		else
-		{
-			$sql = 'SELECT * FROM '.$this->vt.' WHERE sil=0 '.$this->orderby.' LIMIT '.$page.','.page;
-		}
-		
-		$array = array();
-		$query = $this->db->prepare($sql);
-		$query->execute($array);
-		return $query->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	public function orderby($sql,$clm=null,$yon=null)
@@ -74,55 +56,10 @@ class data
 		return $this;
 	}
 
-	public function tumuListele()
-	{
-		$sql = 'SELECT * FROM '.$this->vt.' WHERE sil=0 '.$this->orderby;
-		$array = array();
-		$query = $this->db->prepare($sql);
-		$query->execute($array);
-		return $query->fetchAll(PDO::FETCH_ASSOC);
-	}
-
-	public function firma($ck='')
-	{
-		$ck = ($ck=='') ? '':$ck.'.';
-		$this->arrays['firma_id'] = $_SESSION['firma'];
-		$where = strpos(strtoupper($this->sql),'WHERE');
-		if($where===false)
-		{
-			$fr = ' WHERE '.$ck.'firma_id=:firma_id';
-			$this->sql .= $fr;
-		}
-		else
-		{
-			$fr = ' AND '.$ck.'firma_id=:firma_id';
-			$this->sql .= $fr;
-		}
-		return $this;
-	}
-
-	public function sube($ck='')
-	{
-		$ck = ($ck=='') ? '':$ck.'.';
-		$this->arrays['sube_id'] = $_SESSION['sube'];
-		$where = strpos(strtoupper($this->sql),'WHERE');
-
-		if($where===false)
-		{
-			$sb = ' WHERE '.$ck.'sube_id=:sube_id';
-			$this->sql .= $sb;
-		}
-		else
-		{
-			$sb = ' AND '.$ck.'sube_id=:sube_id';
-			$this->sql .= $sb;
-		}
-		return $this;
-	}
 
 	public function sql($sql)
 	{
-		$this->sifirla();
+		$this->remove();
 		$this->sql = $sql;
 		return $this;
 	}
@@ -130,17 +67,12 @@ class data
 	private function execute()
 	{
 		$page = $this->page;
-		/*if($_SESSION['kul_id']==34)
-			echo $this->sql;*/
 		$query = $this->db->prepare($this->sql.' '.$this->orderby.' '.$this->page);
-
-		//echo $this->sql.' '.$this->orderby.' '.$this->page;
-		//utils::print_r($this->arrays);
 		$query->execute($this->arrays);
 		return $query;
 	}
 
-	public function sqlListele($fetch='')
+	public function result($fetch='')
 	{
 		$query = $this->execute();
 		if($fetch=='fetchObject')
@@ -165,7 +97,7 @@ class data
 	}
 
 	
-	private function sifirla()
+	private function remove()
 	{
 		$this->orderby = '';
 		$this->page = '';
